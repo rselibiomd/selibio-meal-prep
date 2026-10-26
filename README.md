@@ -49,3 +49,11 @@ node tests/browser.cjs
 Use `CHROME_PATH` for another installed Chrome executable, or `BASE_URL` to test a served/deployed site. The tests use a new isolated browser context; they do not change an existing browser profile. Tests cover all four weeks, batch coverage, scaling, unit consolidation, pantry/freezer deductions, grain yield, optional sides, migration, cycle reset, backup validation, persistence, partial stock use, cooking steps and mobile overflow.
 
 GitHub Actions runs the calculation tests on every push and pull request. GitHub Pages serves the static files from `main` as configured for this repository.
+
+## Mobile readability pass
+
+Reading paragraphs and recipe lists use at least 16 px system text, with serif headings. Shared text colors have at least 4.5:1 contrast against their intended backgrounds. Buttons are at least 44 px in both dimensions (most are 48 px tall), with visible keyboard focus. Checkboxes have larger associated labels. Inputs use 16 px text, the freezer selector fits narrow screens, and the week selector reflows when text is enlarged.
+
+On phones and tablets, the section menu stays available while scrolling; Escape closes it. Meal cards stack vertically, device safe areas are respected, and reduced-motion preferences disable CSS animation and smooth navigation. A skip link and announced status messages support keyboard and assistive-technology use. This is a targeted readability and interaction review, not a full WCAG conformance certification.
+
+With Playwright and Chrome available, run `node tests/mobile.cjs` for 50 page/viewport checks across 320, 390, 430, 768 and 1280 px, plus 200% root text enlargement, touch targets, shared color contrast, menu keyboard behavior, and cooking-mode focus. Reference: [W3C WCAG 2.2](https://www.w3.org/TR/WCAG22/).

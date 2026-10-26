@@ -12,15 +12,16 @@
 <link rel="stylesheet" href="planner.css">
 </head>
 <body>
+<a class="skip-link" href="#view">Skip to content</a>
 <div class="app">
 <aside class="sidebar">
-  <div class="mobile-head"><div class="brand"><div class="mark">✳</div><div><strong>The Selibio<br>Table</strong><small>everyday eating, made easier</small></div></div><button class="mobile-menu" id="mobileMenu" aria-expanded="false" aria-controls="navwrap">☰ Menu</button></div>
-  <div class="navwrap" id="navwrap"><p class="side-label">Your kitchen</p><nav class="nav" id="nav"></nav></div>
+  <div class="mobile-head"><div class="brand"><div class="mark">✳</div><div><strong>The Selibio<br> Table</strong><small>everyday eating, made easier</small></div></div><button class="mobile-menu" id="mobileMenu" aria-expanded="false" aria-controls="navwrap">☰ Menu</button></div>
+  <div class="navwrap" id="navwrap"><p class="side-label">Your kitchen</p><nav class="nav" id="nav" aria-label="Kitchen sections"></nav></div>
   <div class="side-footer"><strong>Cook a little. Eat well. Repeat.</strong><br>Four rotating weeks • Two adults<br>Frozen vegetables • Freshly cooked meals<br><br>Your selections stay on this device.</div>
 </aside>
 <div class="main">
 <header class="topbar"><div class="eyebrow" id="topTitle">THE WEEKLY TABLE</div><div class="top-controls"><span class="top-tag" id="topWeek">Week 1 of 4</span><button class="icon-btn" id="printBtn" title="Print current view">⎙ Print</button></div></header>
-<main class="content" id="view"></main>
+<main class="content" id="view" tabindex="-1"></main>
 </div></div>
 <button class="backtop no-print" id="backtop" aria-label="Back to top">↑ Top</button>
 <script src="recipe-data.js"></script>
@@ -106,7 +107,7 @@ function load(){try{const old=JSON.parse(localStorage.getItem(F)||'{}');return {
 function save(){try{localStorage.setItem(F,JSON.stringify(state))}catch(e){}}
 function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
 function ce(s){return esc(s)}
-function setPage(page){state.page=page;save();render();window.scrollTo({top:0,behavior:'smooth'});document.getElementById('navwrap').classList.remove('open');document.getElementById('mobileMenu').setAttribute('aria-expanded','false')}
+function setPage(page){state.page=page;save();render();window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});const title=document.querySelector('#view h1');if(title){title.tabIndex=-1;title.focus({preventScroll:true})}document.getElementById('navwrap').classList.remove('open');document.getElementById('mobileMenu').setAttribute('aria-expanded','false')}
 function setWeek(w){state.week=((w%4)+4)%4;save();render()}
 function currentWeek(){return weeks[state.week]}
 function checkKey(section,i){return section+'-'+state.week+'-'+i}
@@ -115,7 +116,7 @@ function toggleCheck(section,i){const k=checkKey(section,i);state.checked[k]=!st
 function completed(section,n){let x=0;for(let i=0;i<n;i++)if(check(section,i))x++;return x}
 function progress(done,total){return `<div class="progress" aria-label="${done} out of ${total} completed"><i style="width:${Math.round((done/Math.max(1,total))*100)}%"></i></div>`}
 function weekSelect(){return `<div class="week-pills no-print">${weeks.map((w,i)=>`<button data-week="${i}" class="pill ${i===state.week?'active':''}" aria-pressed="${i===state.week}">Week ${i+1}</button>`).join('')}</div>`}
-function weekFeature(){const w=currentWeek();return `<div class="week-feature"><div><div class="smallcap">Week ${state.week+1} of 4</div><h2>${w.title}</h2><p>${w.flavour} · ${w.proteins}</p></div><span class="badge">For two adults</span></div>`}
+function weekFeature(){const w=currentWeek();return `<div class="week-feature"><div><div class="smallcap">Week ${state.week+1} of 4</div><h2>${w.title}</h2><p>${w.flavour} · ${w.proteins}</p></div><span class="badge">For ${state.people} ${state.people===1?'person':'people'}</span></div>`}
 function heading(title,sub){return `<div class="page-intro"><div class="smallcap">THE SELIBIO TABLE</div><h1>${title}</h1><p>${sub}</p></div>`}
 function sectionhead(title,desc,right=''){return `<div class="section-head"><div><h2 class="subheading">${title}</h2>${desc?`<p>${desc}</p>`:''}</div>${right}</div>`}
 function home(){const w=currentWeek();return `<div class="hero"><div><div class="kicker">A FOUR-WEEK KITCHEN SYSTEM</div><h1>Great food at home, without the daily hassle.</h1><p>Prep the building blocks on Sunday, freeze delicious marinades, and make dinner easier than ordering delivery. Cook fresh vegetables in your Ninja, enjoy practical recipes from around the world, and eat well together without rigid rules.</p><div class="hero-actions"><button data-go="menu" class="btn btn-primary">Explore this week's menu ↗</button><button data-go="shopping" class="btn btn-white">Open shopping list</button></div></div><div class="plate-area" aria-hidden="true"><div class="plate"></div><span class="little-leaf">✳</span></div></div>
@@ -180,7 +181,7 @@ function safety(){return `${heading('Food safety & storage','A practical referen
 function footer(){return `<footer class="footer">THE SELIBIO TABLE · A personal home-kitchen planning tool · Prepared October 2026.<br>Recipes and quantities are flexible estimates; tailor for appetite, allergies and dietary requirements. Check original food-safety guidance when in doubt.<br><span class="no-print">This is a static webpage that needs its companion files when saved for offline use. Your week selection, shopping checkboxes, prep checklist and notes are saved locally in this browser, not synced to other devices.</span></footer>`}
 function render(){document.getElementById('nav').innerHTML=sections.map(([id,name,icon])=>`<button class="${state.page===id?'active':''}" data-go="${id}" aria-current="${state.page===id?'page':'false'}"><span class="ni">${icon}</span><span>${name}</span></button>`).join('');document.getElementById('topTitle').textContent=sections.find(x=>x[0]===state.page)?.[1]||'Meal Prep';document.getElementById('topWeek').textContent=`Week ${state.week+1} of 4`;
  const pages={home,menu,shopping,prep,marinades,recipes:recipesPage,breakfasts,sides,safety};document.getElementById('view').innerHTML=`<div class="print-header">THE SELIBIO TABLE · Week ${state.week+1}</div>`+(pages[state.page]||home)()+footer();}
-function toast(msg){let box=document.getElementById('toast');if(!box){box=document.createElement('div');box.id='toast';box.style.cssText='position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#163d32;color:#fff;padding:11px 18px;border-radius:12px;font-size:12px;box-shadow:0 10px 25px #0003;z-index:50;';document.body.appendChild(box)}box.textContent=msg;box.style.display='block';clearTimeout(window.__toast);window.__toast=setTimeout(()=>box.style.display='none',2300)}
+function toast(msg){let box=document.getElementById('toast');if(!box){box=document.createElement('div');box.id='toast';box.setAttribute('role','status');box.setAttribute('aria-live','polite');box.style.cssText='position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#163d32;color:#fff;padding:11px 18px;border-radius:12px;font-size:12px;box-shadow:0 10px 25px #0003;z-index:50;';document.body.appendChild(box)}box.textContent=msg;box.style.display='block';clearTimeout(window.__toast);window.__toast=setTimeout(()=>box.style.display='none',2300)}
 function copyText(text){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard')).catch(()=>fallbackCopy(text))}else fallbackCopy(text)}
 function fallbackCopy(text){const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('Copied to clipboard')}catch(e){toast('Copy unavailable in this browser')}t.remove()}
 function shopText(){let out=`THE SELIBIO TABLE — WEEK ${state.week+1}: ${currentWeek().title}\n\n`;const gs={};allShopping().forEach(x=>(gs[x.cat]??=[]).push(x));for(const [cat,items] of Object.entries(gs)){out+=cat.toUpperCase()+'\n'+items.map(x=>`[ ] ${x.name} — ${x.qty}`).join('\n')+'\n\n'}return out}
